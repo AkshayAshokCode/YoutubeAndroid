@@ -1,0 +1,20 @@
+{
+  "nextPageToken": "CAUQAA",
+  "items": [
+    {
+      "id": {
+        "videoId": "dQw4w9WgXcQ"
+      },
+      "snippet": {
+        "title": "Example video result",
+        "description": "Public search result metadata",
+        "channelTitle": "Example Channel",
+        "thumbnails": {
+          "high": {
+            "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+          }
+        }
+      }
+    }
+  ]
+}

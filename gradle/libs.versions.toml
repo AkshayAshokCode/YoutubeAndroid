@@ -1,8 +1,8 @@
 [versions]
 # Build tools
 agp                     = "8.13.2"          # AGP 8.x — stable, avoids AGP 9.x breaking DSL changes
-kotlin                  = "2.3.20"         # Latest stable (March 2026)
-ksp                     = "2.3.6"           # KSP 2.x is decoupled from Kotlin version
+kotlin                  = "2.2.21"         # Kotlin 2.3 metadata is newer than current Hilt metadata support
+ksp                     = "2.2.21-2.0.5"   # Keep KSP on the same Kotlin metadata line as Hilt-compatible Kotlin
 
 # AndroidX core
 coreKtx                 = "1.17.0"

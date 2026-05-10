@@ -1,0 +1,15 @@
+{
+  "items": [
+    {
+      "id": "PLBCF2DAC6FFB574DE",
+      "snippet": {
+        "title": "Example playlist",
+        "description": "Public videos"
+      },
+      "contentDetails": {
+        "itemCount": 42
+      }
+    }
+  ],
+  "nextPageToken": "CAUQAA"
+}

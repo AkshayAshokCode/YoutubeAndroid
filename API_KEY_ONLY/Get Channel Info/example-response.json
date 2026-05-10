@@ -1,0 +1,21 @@
+{
+  "items": [
+    {
+      "id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      "snippet": {
+        "title": "Google Developers",
+        "description": "Example channel"
+      },
+      "contentDetails": {
+        "relatedPlaylists": {
+          "uploads": "UU_x5XG1OV2P6uZZ5FSM9Ttw"
+        }
+      },
+      "statistics": {
+        "viewCount": "1000000",
+        "subscriberCount": "2500000",
+        "videoCount": "5000"
+      }
+    }
+  ]
+}
