@@ -1,104 +1,64 @@
-# youtube-api-examples
+# YoutubeAndroid
 
-A grab-and-go Android Kotlin reference repo for the YouTube Data API v3.
+A Kotlin Android reference project for developers who want to integrate the YouTube Data API v3 without starting from raw documentation.
 
-The goal is simple: Android developers should be able to copy one feature folder, add their API key or OAuth token provider, and understand the request, response, quota cost, and edge cases without digging through Google docs first.
+The project is intentionally split into two learning paths:
 
-## Quick start
+1. **API_KEY_ONLY** — public data features that work with a YouTube Data API key and do not require user login.
+2. **OAUTH_REQUIRED** — account-scoped features that require Google Sign-In / OAuth 2.0 user consent.
 
-### API-key-only features in 30 seconds
+## Project goals
 
-1. Create a YouTube Data API v3 key in Google Cloud Console.
-2. Add it to `~/.gradle/gradle.properties` or this project `gradle.properties`:
+- Demonstrate every major YouTube Data API v3 feature in a practical Android app.
+- Keep every feature self-contained with its own repository, ViewModel/UI state where applicable, and README.
+- Use Kotlin, MVVM, Repository pattern, Coroutines, Flow, Retrofit, Moshi, OkHttp, and Hilt.
+- Provide clean error handling and comments for the API-specific details that usually slow Android developers down.
 
-   ```properties
-   YT_API_KEY=your_api_key_here
-   ```
+## Current implementation status
 
-3. Open one folder in [`API_KEY_ONLY`](API_KEY_ONLY), copy the implementation and ViewModel into your app, and wire the Retrofit interface to your Retrofit instance.
-4. Use the folder's `example-response.json` to build UI before hitting the real API.
+### API_KEY_ONLY
 
-See [`setup-guide/API_KEY_SETUP.md`](setup-guide/API_KEY_SETUP.md) for the short setup and [`setup-guide/SHA1_FINGERPRINT.md`](setup-guide/SHA1_FINGERPRINT.md) for key restriction guidance.
+- ✅ Search videos, channels, and playlists
+- ✅ Fetch video details and metadata
+- ✅ Get channel info and stats
+- ✅ Browse public playlists and playlist items
+- ✅ Get video categories and supported regions
 
-### OAuth-required features
+### OAUTH_REQUIRED
 
-1. Configure Google Sign-In and an OAuth client.
-2. Request the smallest YouTube scope needed by the feature.
-3. Provide an access-token function to the feature implementation.
-4. Copy the feature folder from [`OAUTH_REQUIRED`](OAUTH_REQUIRED).
+- ⬜ Upload videos
+- ⬜ Live streaming: create, manage, and transition broadcast states
+- ⬜ Live chat: read and post messages
+- ⬜ Post and delete comments
+- ⬜ Manage playlists: create playlists, add videos, remove videos
+- ⬜ Subscribe and unsubscribe to channels
+- ⬜ Manage captions
 
-See [`setup-guide/OAUTH_SETUP.md`](setup-guide/OAUTH_SETUP.md) for the Android OAuth checklist.
+## API key setup
 
-### UI flow plan
+Add your YouTube Data API key to `~/.gradle/gradle.properties` or the project `gradle.properties` file:
 
-The runnable sample app starts with a root selection screen where developers choose **API Key APIs** or **OAuth APIs (Advanced)**. This core product structure and the detailed navigation/screen plan are documented in [`docs/UI_FLOW.md`](docs/UI_FLOW.md).
-
-## Repository structure
-
-```text
-youtube-api-examples/
-├── README.md
-├── API_KEY_ONLY/
-│   ├── Search Videos/
-│   ├── Get Video Details/
-│   ├── Get Channel Info/
-│   ├── Browse Playlists/
-│   └── Get Categories and Regions/
-├── OAUTH_REQUIRED/
-│   ├── Upload Video/
-│   ├── Live Streaming/
-│   ├── Live Chat/
-│   ├── Post Comments/
-│   ├── Manage Playlists/
-│   ├── Subscribe to Channels/
-│   └── Manage Captions/
-├── setup-guide/
-│   ├── API_KEY_SETUP.md
-│   ├── OAUTH_SETUP.md
-│   └── SHA1_FINGERPRINT.md
-└── app/
-    └── Android project shell with shared dependencies and existing sample code
+```properties
+YT_API_KEY=your_api_key_here
 ```
 
-## Feature folder contract
+The app exposes this value as `BuildConfig.YOUTUBE_API_KEY` and appends it to API-key-only requests through `ApiKeyInterceptor`.
 
-Every feature folder follows the same shape:
+## Package map
 
 ```text
-Feature Name/
-├── FeatureName.kt              # actual API implementation + request/response models
-├── FeatureNameViewModel.kt     # UI logic separated from API logic
-├── README.md                   # what it does, quota cost, edge cases
-└── example-response.json       # sample API response shape
+app/src/main/java/com/akshayashokcode/youtubeandroid/
+├── core/
+│   ├── model/          # Shared YouTube response DTOs
+│   ├── network/        # Retrofit API and API-key interceptor
+│   ├── result/         # Result wrapper for repositories
+│   └── ui/             # Shared UI state model
+├── di/                 # Hilt modules
+└── features/
+    ├── apikeyonly/     # Public API-key-only examples
+    └── oauthrequired/  # OAuth feature guides and future implementations
 ```
 
-This structure keeps auth boundaries obvious:
+## Feature folders
 
-- Use `API_KEY_ONLY` when the endpoint reads public data and does not need a user account.
-- Use `OAUTH_REQUIRED` when the endpoint reads or mutates the signed-in user's YouTube account.
-
-## Current API-key-only examples
-
-| Folder | Endpoint(s) | Auth |
-|---|---|---|
-| [`Search Videos`](API_KEY_ONLY/Search%20Videos) | `search.list` | API key |
-| [`Get Video Details`](API_KEY_ONLY/Get%20Video%20Details) | `videos.list` | API key |
-| [`Get Channel Info`](API_KEY_ONLY/Get%20Channel%20Info) | `channels.list` | API key |
-| [`Browse Playlists`](API_KEY_ONLY/Browse%20Playlists) | `playlists.list`, `playlistItems.list` | API key |
-| [`Get Categories and Regions`](API_KEY_ONLY/Get%20Categories%20and%20Regions) | `videoCategories.list`, `i18nRegions.list` | API key |
-
-## Current OAuth-required examples
-
-| Folder | Endpoint(s) | Auth |
-|---|---|---|
-| [`Upload Video`](OAUTH_REQUIRED/Upload%20Video) | `videos.insert` | OAuth |
-| [`Live Streaming`](OAUTH_REQUIRED/Live%20Streaming) | `liveBroadcasts.*`, `liveStreams.*` | OAuth |
-| [`Live Chat`](OAUTH_REQUIRED/Live%20Chat) | `liveChatMessages.list`, `liveChatMessages.insert` | OAuth |
-| [`Post Comments`](OAUTH_REQUIRED/Post%20Comments) | `commentThreads.insert`, `comments.delete` | OAuth |
-| [`Manage Playlists`](OAUTH_REQUIRED/Manage%20Playlists) | `playlists.insert`, `playlistItems.*` | OAuth |
-| [`Subscribe to Channels`](OAUTH_REQUIRED/Subscribe%20to%20Channels) | `subscriptions.insert`, `subscriptions.delete` | OAuth |
-| [`Manage Captions`](OAUTH_REQUIRED/Manage%20Captions) | `captions.*` | OAuth |
-
-## Android app module
-
-The `app/` module remains available as a runnable Android project shell with shared Gradle dependencies, Hilt setup, Retrofit/Moshi/OkHttp dependencies, and existing core examples. The top-level folders are intentionally optimized for copy-paste learning and direct integration into other Android apps.
+Each feature folder contains the code and README needed to understand that feature in isolation. Start with `features/apikeyonly/search` for the smallest end-to-end MVVM example.
