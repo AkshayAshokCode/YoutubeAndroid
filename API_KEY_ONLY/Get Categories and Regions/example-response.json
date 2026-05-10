@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "id": "22",
+      "snippet": {
+        "title": "People & Blogs",
+        "assignable": true
+      }
+    },
+    {
+      "id": "24",
+      "snippet": {
+        "title": "Entertainment",
+        "assignable": true
+      }
+    }
+  ]
+}
