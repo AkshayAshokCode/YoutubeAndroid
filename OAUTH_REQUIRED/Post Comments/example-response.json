@@ -1,0 +1,10 @@
+{
+  "id": "example-resource-id",
+  "snippet": {
+    "title": "Post Comments",
+    "description": "Example OAuth response shape"
+  },
+  "status": {
+    "privacyStatus": "unlisted"
+  }
+}
