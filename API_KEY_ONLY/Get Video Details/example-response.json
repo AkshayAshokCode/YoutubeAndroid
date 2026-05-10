@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "id": "dQw4w9WgXcQ",
+      "snippet": {
+        "title": "Example video",
+        "channelTitle": "Example Channel"
+      },
+      "contentDetails": {
+        "duration": "PT3M33S",
+        "definition": "hd"
+      },
+      "statistics": {
+        "viewCount": "123456",
+        "likeCount": "7890"
+      },
+      "status": {
+        "privacyStatus": "public",
+        "embeddable": true
+      }
+    }
+  ]
+}
