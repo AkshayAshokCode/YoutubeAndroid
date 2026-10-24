@@ -217,6 +217,7 @@ data class PlaylistItemSnippet(
 data class ResourceId(
     val kind: String? = null,
     val videoId: String? = null,
+    val channelId: String? = null,
 )
 
 @JsonClass(generateAdapter = true)
@@ -274,4 +275,318 @@ data class Snippet(
     val localized: LocalizedText? = null,
     val defaultLanguage: String? = null,
     val defaultAudioLanguage: String? = null,
+)
+
+// ── Comments ─────────────────────────────────────────────────────────────────
+
+@JsonClass(generateAdapter = true)
+data class CommentThreadListResponse(
+    val nextPageToken: String? = null,
+    val pageInfo: PageInfo? = null,
+    val items: List<CommentThread> = emptyList(),
+)
+
+@JsonClass(generateAdapter = true)
+data class CommentThread(
+    val id: String? = null,
+    val snippet: CommentThreadSnippet? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class CommentThreadSnippet(
+    val videoId: String? = null,
+    val topLevelComment: Comment? = null,
+    val totalReplyCount: Int? = null,
+    val isPublic: Boolean? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class Comment(
+    val id: String? = null,
+    val snippet: CommentSnippet? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class CommentSnippet(
+    val textDisplay: String? = null,
+    val textOriginal: String? = null,
+    val authorDisplayName: String? = null,
+    val authorProfileImageUrl: String? = null,
+    val likeCount: Long? = null,
+    val publishedAt: String? = null,
+    val updatedAt: String? = null,
+    val videoId: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class CommentThreadInsertRequest(
+    val snippet: CommentThreadInsertSnippet,
+)
+
+@JsonClass(generateAdapter = true)
+data class CommentThreadInsertSnippet(
+    val videoId: String,
+    val topLevelComment: CommentInsertBody,
+)
+
+@JsonClass(generateAdapter = true)
+data class CommentInsertBody(
+    val snippet: CommentInsertSnippet,
+)
+
+@JsonClass(generateAdapter = true)
+data class CommentInsertSnippet(
+    val textOriginal: String,
+)
+
+// ── Subscriptions ─────────────────────────────────────────────────────────────
+
+@JsonClass(generateAdapter = true)
+data class SubscriptionListResponse(
+    val nextPageToken: String? = null,
+    val pageInfo: PageInfo? = null,
+    val items: List<Subscription> = emptyList(),
+)
+
+@JsonClass(generateAdapter = true)
+data class Subscription(
+    val id: String? = null,
+    val snippet: SubscriptionSnippet? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class SubscriptionSnippet(
+    val channelId: String? = null,
+    val title: String? = null,
+    val description: String? = null,
+    val publishedAt: String? = null,
+    val thumbnails: Thumbnails? = null,
+    val resourceId: ResourceId? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class SubscriptionInsertRequest(
+    val snippet: SubscriptionInsertSnippet,
+)
+
+@JsonClass(generateAdapter = true)
+data class SubscriptionInsertSnippet(
+    val resourceId: ResourceId,
+)
+
+// ── Captions ──────────────────────────────────────────────────────────────────
+
+@JsonClass(generateAdapter = true)
+data class CaptionListResponse(
+    val items: List<Caption> = emptyList(),
+)
+
+@JsonClass(generateAdapter = true)
+data class Caption(
+    val id: String? = null,
+    val snippet: CaptionSnippet? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class CaptionSnippet(
+    val videoId: String? = null,
+    val lastUpdated: String? = null,
+    val trackKind: String? = null,
+    val language: String? = null,
+    val name: String? = null,
+    val audioTrackType: String? = null,
+    val isCC: Boolean? = null,
+    val isDraft: Boolean? = null,
+    val status: String? = null,
+)
+
+// ── Live Broadcasting ─────────────────────────────────────────────────────────
+
+@JsonClass(generateAdapter = true)
+data class LiveBroadcastListResponse(
+    val nextPageToken: String? = null,
+    val pageInfo: PageInfo? = null,
+    val items: List<LiveBroadcast> = emptyList(),
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveBroadcast(
+    val id: String? = null,
+    val snippet: LiveBroadcastSnippet? = null,
+    val status: LiveBroadcastStatus? = null,
+    val contentDetails: LiveBroadcastContentDetails? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveBroadcastSnippet(
+    val title: String? = null,
+    val description: String? = null,
+    val scheduledStartTime: String? = null,
+    val actualStartTime: String? = null,
+    val actualEndTime: String? = null,
+    val liveChatId: String? = null,
+    val thumbnails: Thumbnails? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveBroadcastStatus(
+    val lifeCycleStatus: String? = null,
+    val privacyStatus: String? = null,
+    val recordingStatus: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveBroadcastContentDetails(
+    val boundStreamId: String? = null,
+    val enableAutoStart: Boolean? = null,
+    val enableAutoStop: Boolean? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveBroadcastInsertRequest(
+    val snippet: LiveBroadcastInsertSnippet,
+    val status: LiveBroadcastInsertStatus,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveBroadcastInsertSnippet(
+    val title: String,
+    val scheduledStartTime: String,
+    val description: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveBroadcastInsertStatus(
+    val privacyStatus: String,
+)
+
+// ── Live Streams ──────────────────────────────────────────────────────────────
+
+@JsonClass(generateAdapter = true)
+data class LiveStreamListResponse(
+    val items: List<LiveStream> = emptyList(),
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveStream(
+    val id: String? = null,
+    val snippet: LiveStreamSnippet? = null,
+    val cdn: LiveStreamCdn? = null,
+    val status: LiveStreamStatus? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveStreamSnippet(
+    val title: String? = null,
+    val description: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveStreamCdn(
+    val ingestionType: String? = null,
+    val ingestionInfo: LiveStreamIngestionInfo? = null,
+    val resolution: String? = null,
+    val frameRate: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveStreamIngestionInfo(
+    val streamName: String? = null,
+    val ingestionAddress: String? = null,
+    val backupIngestionAddress: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveStreamStatus(
+    val streamStatus: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveStreamInsertRequest(
+    val snippet: LiveStreamInsertSnippet,
+    val cdn: LiveStreamCdn,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveStreamInsertSnippet(
+    val title: String,
+    val description: String? = null,
+)
+
+// ── Live Chat ─────────────────────────────────────────────────────────────────
+
+@JsonClass(generateAdapter = true)
+data class LiveChatMessageListResponse(
+    val nextPageToken: String? = null,
+    val pollingIntervalMillis: Long? = null,
+    val pageInfo: PageInfo? = null,
+    val items: List<LiveChatMessage> = emptyList(),
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveChatMessage(
+    val id: String? = null,
+    val snippet: LiveChatMessageSnippet? = null,
+    val authorDetails: LiveChatAuthorDetails? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveChatMessageSnippet(
+    val type: String? = null,
+    val liveChatId: String? = null,
+    val authorChannelId: String? = null,
+    val publishedAt: String? = null,
+    val displayMessage: String? = null,
+    val textMessageDetails: TextMessageDetails? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class TextMessageDetails(
+    val messageText: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveChatAuthorDetails(
+    val channelId: String? = null,
+    val displayName: String? = null,
+    val profileImageUrl: String? = null,
+    val isChatOwner: Boolean? = null,
+    val isChatModerator: Boolean? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveChatMessageInsertRequest(
+    val snippet: LiveChatMessageInsertSnippet,
+)
+
+@JsonClass(generateAdapter = true)
+data class LiveChatMessageInsertSnippet(
+    val liveChatId: String,
+    val type: String = "textMessageEvent",
+    val textMessageDetails: TextMessageDetails,
+)
+
+// ── Playlist write bodies ─────────────────────────────────────────────────────
+
+@JsonClass(generateAdapter = true)
+data class PlaylistInsertRequest(
+    val snippet: PlaylistInsertSnippet,
+    val status: PlaylistStatus,
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaylistInsertSnippet(
+    val title: String,
+    val description: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaylistItemInsertRequest(
+    val snippet: PlaylistItemInsertSnippet,
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaylistItemInsertSnippet(
+    val playlistId: String,
+    val resourceId: ResourceId,
 )
