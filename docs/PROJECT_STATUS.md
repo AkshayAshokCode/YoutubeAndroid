@@ -74,9 +74,10 @@ ViewModel unit tests (JUnit + MockK + Turbine + coroutines-test):
 
 Ordered by priority.
 
-### 0. Housekeeping (do first)
-- [ ] **Move `YT_API_KEY` out of the project `gradle.properties`.** That file is tracked by git, so the key would be committed. Put it in `~/.gradle/gradle.properties` or `local.properties` (both git-ignored) instead.
-- [ ] **Commit the current work.** Most of Phases 2–5 is still untracked or uncommitted.
+### 0. Housekeeping
+- [x] Keep `YT_API_KEY` in `~/.gradle/gradle.properties`, not the tracked project `gradle.properties`
+- [x] Commit Phases 2–5 work (branch `feature/oauth-features-and-status`)
+- [ ] Merge the branch into `master`
 
 ### 1. Real Google Sign-In (blocker)
 `core/auth/AuthRepository.kt` currently fakes sign-in: it waits 600 ms and sets `demo@example.com` with token `"REPLACE_WITH_REAL_OAUTH_TOKEN"`. Every OAuth feature returns 401 until this is replaced.
