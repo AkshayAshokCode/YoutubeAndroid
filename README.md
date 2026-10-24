@@ -16,23 +16,9 @@ The project is intentionally split into two learning paths:
 
 ## Current implementation status
 
-### API_KEY_ONLY
+All API-key features are runnable. All OAuth feature screens are wired, but Google Sign-In is still a stub, so OAuth requests won't succeed yet.
 
-- ✅ Search videos, channels, and playlists
-- ✅ Fetch video details and metadata
-- ✅ Get channel info and stats
-- ✅ Browse public playlists and playlist items
-- ✅ Get video categories and supported regions
-
-### OAUTH_REQUIRED
-
-- ⬜ Upload videos
-- ⬜ Live streaming: create, manage, and transition broadcast states
-- ⬜ Live chat: read and post messages
-- ⬜ Post and delete comments
-- ⬜ Manage playlists: create playlists, add videos, remove videos
-- ⬜ Subscribe and unsubscribe to channels
-- ⬜ Manage captions
+See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for the full done / remaining checklist.
 
 ## API key setup
 
