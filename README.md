@@ -16,7 +16,7 @@ The project is intentionally split into two learning paths:
 
 ## Current implementation status
 
-All API-key features are runnable. All OAuth feature screens are wired, but Google Sign-In is still a stub, so OAuth requests won't succeed yet.
+All API-key features are runnable. OAuth features use real Google sign-in. To run them, register an Android OAuth client for the app (see [setup-guide/OAUTH_SETUP.md](setup-guide/OAUTH_SETUP.md)).
 
 See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for the full done / remaining checklist.
 

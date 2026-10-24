@@ -2,6 +2,7 @@ package com.akshayashokcode.youtubeandroid.di
 
 import com.akshayashokcode.youtubeandroid.core.network.ApiKeyInterceptor
 import com.akshayashokcode.youtubeandroid.core.network.OAuthInterceptor
+import com.akshayashokcode.youtubeandroid.core.network.OAuthTokenAuthenticator
 import com.akshayashokcode.youtubeandroid.core.network.YouTubeApiService
 import com.akshayashokcode.youtubeandroid.core.network.YouTubeOAuthApiService
 import com.squareup.moshi.Moshi
@@ -44,9 +45,13 @@ object NetworkModule {
     @Provides
     @Singleton
     @OAuthClient
-    fun provideOAuthOkHttpClient(oauthInterceptor: OAuthInterceptor): OkHttpClient =
+    fun provideOAuthOkHttpClient(
+        oauthInterceptor: OAuthInterceptor,
+        tokenAuthenticator: OAuthTokenAuthenticator,
+    ): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor(oauthInterceptor)
+            .authenticator(tokenAuthenticator)
             .addInterceptor(loggingInterceptor())
             .build()
 

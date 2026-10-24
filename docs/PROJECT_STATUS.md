@@ -2,16 +2,16 @@
 
 What's done and what's left, measured against the plan in [UI_FLOW.md](UI_FLOW.md).
 
-_Last reviewed: 2026-10-24. `./gradlew assembleDebug testDebugUnitTest` passes (24 unit tests, 0 failures)._
+_Last reviewed: 2026-10-24. `./gradlew assembleDebug testDebugUnitTest` passes (30 unit tests, 0 failures)._
 
 ## Summary
 
 | Area | State |
 |---|---|
 | API-key features (6 screens) | ✅ Runnable end to end |
-| OAuth features (7 screens) | 🟡 UI, ViewModels, and API calls wired; **sign-in is a stub**, so requests fail with 401 |
+| OAuth features (7 screens) | 🟡 Wired to real Google sign-in; **not yet tested end to end** with a registered OAuth client |
 | Navigation | ✅ Compose `NavHost`, 17 routes |
-| Unit tests | 🟡 7 of 13 feature ViewModels covered |
+| Unit tests | 🟡 7 of 13 feature ViewModels + AuthViewModel covered |
 | Planned polish (raw JSON, setup guide screen, structured errors) | ⬜ Not started |
 | Docs | 🟡 Root README status section was outdated (now links here) |
 
@@ -40,7 +40,7 @@ All live under `features/apikeyonly/`, each with Repository + ViewModel + Screen
 - [x] Separate OkHttp/Retrofit instances via `@ApiKeyClient` and `@OAuthClient` qualifiers (`di/`)
 - [x] `YouTubeOAuthApiService` with all write and OAuth-only read endpoints
 - [x] Auth card on root screen; lock overlay on OAuth feature list when signed out
-- [ ] **Real Google Sign-In.** See [Remaining → 1](#1-real-google-sign-in-blocker)
+- [x] Real Google sign-in via `AuthorizationClient`, silent token refresh on 401, session restore on launch
 
 ### Phase 4 — OAuth runnable flows
 All live under `features/oauthrequired/`, each with Repository + ViewModel + Screen.
@@ -62,6 +62,7 @@ ViewModel unit tests (JUnit + MockK + Turbine + coroutines-test):
 - [x] TrendingVideosViewModel
 - [x] CommentsViewModel
 - [x] SubscriptionsViewModel
+- [x] AuthViewModel
 
 ### Supporting material
 - [x] Top-level copy-paste example folders: `API_KEY_ONLY/` and `OAUTH_REQUIRED/`, each with code, ViewModel, README, `example-response.json`
@@ -77,17 +78,14 @@ Ordered by priority.
 ### 0. Housekeeping
 - [x] Keep `YT_API_KEY` in `~/.gradle/gradle.properties`, not the tracked project `gradle.properties`
 - [x] Commit Phases 2–5 work (branch `feature/oauth-features-and-status`)
-- [ ] Merge the branch into `master`
+- [x] Merged into `master` (PR #10)
 
-### 1. Real Google Sign-In (blocker)
-`core/auth/AuthRepository.kt` currently fakes sign-in: it waits 600 ms and sets `demo@example.com` with token `"REPLACE_WITH_REAL_OAUTH_TOKEN"`. Every OAuth feature returns 401 until this is replaced.
+### 1. Verify OAuth end to end (needs your Google Cloud setup)
+Code is done (`AuthRepository`, `OAuthTokenAuthenticator`, consent launcher in `YouTubeExamplesApp`). What's left needs a Cloud project:
 
-- [ ] Add an auth dependency to `libs.versions.toml` (Credential Manager + `play-services-auth` `AuthorizationClient`, or AppAuth). None is present today.
-- [ ] Create OAuth client IDs in Google Cloud (Android client with debug/release SHA-1, see `setup-guide/OAUTH_SETUP.md`)
-- [ ] Request per-feature scopes (`youtube`, `youtube.upload`, `youtube.force-ssl`). The scope table is in `OAUTH_SETUP.md`.
-- [ ] Get a real **access token**. The stub's comment suggests `serverAuthCode`, but that is an auth code for a backend, not a bearer token.
-- [ ] Handle token expiry/refresh: on 401, re-authorize and retry
-- [ ] Handle `403 insufficientPermissions` by requesting the missing scope
+- [ ] Register an **Android** OAuth client for `com.akshayashokcode.youtubeandroid` with the debug SHA-1 (`./gradlew signingReport`), and add your account as a test user. See `setup-guide/OAUTH_SETUP.md`.
+- [ ] Run each OAuth feature on a device against a test channel; fix whatever the real API rejects
+- [ ] Add the release SHA-1 before shipping a release build
 
 ### 2. Feature gaps
 - [ ] **Resumable upload** for Upload Video. Today it is a single multipart request, which fails for large files. The feature README already promises resumable uploads, progress, and an upload session URL.
@@ -99,11 +97,11 @@ Ordered by priority.
 - [ ] **Sample-response mode**: render `example-response.json` without spending quota
 - [ ] **SetupGuideScreen**: in-app setup docs
 - [ ] **Structured errors**: title / explanation / likely cause / fix action / raw body. `UiState.Error` holds only a `message` today; UI_FLOW proposes a richer `FeatureUiState`.
-- [ ] Specific handling for `quotaExceeded`, 401 (refresh sign-in), 403 (request scope), 404
+- [ ] Specific handling for `quotaExceeded`, 403, and 404 (401 is now retried with a fresh token automatically)
 - [ ] Per-screen header with endpoint, quota cost, required scope, README link (quota currently shows only on list cards)
 
 ### 4. Tests
-- [ ] ViewModel tests: PublicPlaylists, ManagePlaylists, Captions, VideoUpload, LiveStreaming, LiveChat, Auth
+- [ ] ViewModel tests: PublicPlaylists, ManagePlaylists, Captions, VideoUpload, LiveStreaming, LiveChat
 - [ ] Repository tests (e.g. MockWebServer against Retrofit services)
 - [ ] Compose UI / instrumented tests (`androidTest` only has the template test)
 

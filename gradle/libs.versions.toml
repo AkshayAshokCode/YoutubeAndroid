@@ -31,6 +31,9 @@ moshi                   = "1.15.2"
 # Coroutines
 coroutines              = "1.10.2"
 
+# Google auth
+playServicesAuth        = "21.4.0"         # AuthorizationClient for OAuth access tokens
+
 # UI
 material                = "1.12.0"
 constraintlayout        = "2.2.1"
@@ -87,6 +90,10 @@ moshi-kotlin-codegen    = { group = "com.squareup.moshi",     name = "moshi-kotl
 # Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core    = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core",    version.ref = "coroutines" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
+
+# Google auth
+play-services-auth      = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 
 # UI
 material                = { group = "com.google.android.material", name = "material",         version.ref = "material" }

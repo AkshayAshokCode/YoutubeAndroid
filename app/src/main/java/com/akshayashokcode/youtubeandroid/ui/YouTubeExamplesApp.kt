@@ -1,5 +1,8 @@
 package com.akshayashokcode.youtubeandroid.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +23,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -131,6 +135,16 @@ private val oauthFeatures = listOf(
 fun YouTubeExamplesApp(authViewModel: AuthViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     val authState by authViewModel.authState.collectAsState()
+
+    // Google's account picker / consent screen, requested by AuthViewModel.signIn().
+    val consentLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result -> authViewModel.onConsentResult(result.resultCode, result.data) }
+    LaunchedEffect(Unit) {
+        authViewModel.consentRequests.collect { pendingIntent ->
+            consentLauncher.launch(IntentSenderRequest.Builder(pendingIntent.intentSender).build())
+        }
+    }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -324,13 +338,19 @@ private fun AuthCard(authState: AuthState, onSignIn: () -> Unit, onSignOut: () -
                 AuthState.SignedOut -> {
                     Text("Not signed in. OAuth features require Google Sign-In.",
                         style = MaterialTheme.typography.bodySmall)
-                    Button(onClick = onSignIn) { Text("Sign in (Demo)") }
+                    Button(onClick = onSignIn) { Text("Sign in with Google") }
+                }
+                is AuthState.Error -> {
+                    Text(authState.message, style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error)
+                    Button(onClick = onSignIn) { Text("Try again") }
                 }
                 AuthState.SigningIn -> {
                     Text("Signing in…", style = MaterialTheme.typography.bodySmall)
                 }
                 is AuthState.SignedIn -> {
-                    Text("Signed in as ${authState.displayName} (${authState.email})",
+                    Text("Signed in as ${authState.displayName}" +
+                        authState.email.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(),
                         style = MaterialTheme.typography.bodySmall)
                     Button(
                         onClick = onSignOut,

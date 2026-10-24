@@ -8,4 +8,5 @@ sealed interface AuthState {
         val displayName: String,
         val token: String,
     ) : AuthState
+    data class Error(val message: String) : AuthState
 }

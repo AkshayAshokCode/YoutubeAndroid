@@ -112,6 +112,10 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // Google auth
+    implementation(libs.play.services.auth)
 
     // UI Utilities
     implementation(libs.material)
