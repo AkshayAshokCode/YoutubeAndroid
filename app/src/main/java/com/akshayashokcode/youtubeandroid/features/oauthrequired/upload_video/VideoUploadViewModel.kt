@@ -1,5 +1,6 @@
 package com.akshayashokcode.youtubeandroid.features.oauthrequired.upload_video
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.akshayashokcode.youtubeandroid.core.model.Video
@@ -11,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,8 +22,12 @@ class VideoUploadViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState<Video>>(UiState.Idle)
     val uiState: StateFlow<UiState<Video>> = _uiState.asStateFlow()
 
+    /** Fraction uploaded (0f..1f) while an upload is running, null otherwise. */
+    private val _progress = MutableStateFlow<Float?>(null)
+    val progress: StateFlow<Float?> = _progress.asStateFlow()
+
     fun upload(
-        file: File,
+        uri: Uri,
         title: String,
         description: String,
         tags: String,
@@ -40,12 +44,25 @@ class VideoUploadViewModel @Inject constructor(
             madeForKids = madeForKids,
         )
         viewModelScope.launch {
-            repository.uploadVideo(file, metadata)
-                .onStart { _uiState.value = UiState.Loading }
+            repository.uploadVideo(uri, metadata)
+                .onStart {
+                    _uiState.value = UiState.Loading
+                    _progress.value = 0f
+                }
                 .collect { result ->
-                    _uiState.value = when (result) {
-                        is AppResult.Success -> UiState.Data(result.data)
-                        is AppResult.Error -> UiState.Error(result.message.ifBlank { "Upload failed." })
+                    when (result) {
+                        is AppResult.Success -> when (val event = result.data) {
+                            is UploadEvent.Progress ->
+                                _progress.value = event.bytesSent.toFloat() / event.totalBytes
+                            is UploadEvent.Completed -> {
+                                _progress.value = null
+                                _uiState.value = UiState.Data(event.video)
+                            }
+                        }
+                        is AppResult.Error -> {
+                            _progress.value = null
+                            _uiState.value = UiState.Error(result.message.ifBlank { "Upload failed." })
+                        }
                     }
                 }
         }

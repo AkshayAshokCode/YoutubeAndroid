@@ -2,7 +2,7 @@
 
 What's done and what's left, measured against the plan in [UI_FLOW.md](UI_FLOW.md).
 
-_Last reviewed: 2026-10-24. `./gradlew assembleDebug testDebugUnitTest` passes (30 unit tests, 0 failures)._
+_Last reviewed: 2026-10-24. `./gradlew assembleDebug testDebugUnitTest` passes (38 unit tests, 0 failures)._
 
 ## Summary
 
@@ -11,7 +11,7 @@ _Last reviewed: 2026-10-24. `./gradlew assembleDebug testDebugUnitTest` passes (
 | API-key features (6 screens) | ✅ Runnable end to end |
 | OAuth features (7 screens) | 🟡 Sign-in and Subscriptions verified on a device; other 6 features not yet run against the real API |
 | Navigation | ✅ Compose `NavHost`, 17 routes |
-| Unit tests | 🟡 7 of 13 feature ViewModels + AuthViewModel covered |
+| Unit tests | 🟡 8 of 13 feature ViewModels + AuthViewModel covered |
 | Planned polish (raw JSON, setup guide screen, structured errors) | ⬜ Not started |
 | Docs | 🟡 Root README status section was outdated (now links here) |
 
@@ -49,7 +49,7 @@ All live under `features/oauthrequired/`, each with Repository + ViewModel + Scr
 - [x] **Manage Playlists** — create playlist, add video, remove item (`manage_playlists/`)
 - [x] **Subscriptions** — subscribe, unsubscribe (`subscriptions/`)
 - [x] **Manage Captions** — list, upload via file picker, delete (`captions/`)
-- [x] **Upload Video** — single-request multipart upload (`upload_video/`)
+- [x] **Upload Video** — resumable upload in 8 MiB chunks with progress and automatic resume, streamed from the picked file (`upload_video/`)
 - [x] **Live Streaming** — create broadcast + stream, bind, testing/live/complete transitions, stream key reveal (`live_streaming/`)
 - [x] **Live Chat** — polling driven by `pollingIntervalMillis`, send messages (`live_chat/`)
 
@@ -63,6 +63,7 @@ ViewModel unit tests (JUnit + MockK + Turbine + coroutines-test):
 - [x] CommentsViewModel
 - [x] SubscriptionsViewModel
 - [x] AuthViewModel
+- [x] VideoUploadViewModel + VideoUploadRepository (resumable protocol)
 
 ### Supporting material
 - [x] Top-level copy-paste example folders: `API_KEY_ONLY/` and `OAUTH_REQUIRED/`, each with code, ViewModel, README, `example-response.json`
@@ -91,7 +92,7 @@ sign-in, session restore, restricted API key (Video Details), Subscriptions subs
 - [ ] Optional: submit the consent screen for verification; until then only listed test users can sign in and API uploads stay private
 
 ### 2. Feature gaps
-- [ ] **Resumable upload** for Upload Video. Today it is a single multipart request, which fails for large files. The feature README already promises resumable uploads, progress, and an upload session URL.
+- [x] **Resumable upload** for Upload Video, with progress bar and resume after network errors. Not yet run against the real API (costs 1600 quota units).
 - [ ] **Captions update.** The OAuth feature card says "List, upload, update, and delete", but there's no `captions.update` endpoint or UI.
 - [ ] Live Chat: look up `liveChatId` from a video ID (UI_FLOW lists this input)
 
@@ -104,11 +105,11 @@ sign-in, session restore, restricted API key (Video Details), Subscriptions subs
 - [ ] Per-screen header with endpoint, quota cost, required scope, README link (quota currently shows only on list cards)
 
 ### 4. Tests
-- [ ] ViewModel tests: PublicPlaylists, ManagePlaylists, Captions, VideoUpload, LiveStreaming, LiveChat
-- [ ] Repository tests (e.g. MockWebServer against Retrofit services)
+- [ ] ViewModel tests: PublicPlaylists, ManagePlaylists, Captions, LiveStreaming, LiveChat
+- [ ] Repository tests (e.g. MockWebServer against Retrofit services). `VideoUploadRepository` has protocol tests.
 - [ ] Compose UI / instrumented tests (`androidTest` only has the template test)
 
 ### 5. Cleanup and docs
-- [ ] Merge `features/oauthrequired/upload_videos/README.md` into `upload_video/`. The README-only folder is left over.
+- [x] Merged the leftover `upload_videos/README.md` into `upload_video/README.md`
 - [ ] Check that the top-level `API_KEY_ONLY/` and `OAUTH_REQUIRED/` copy-paste examples still match the app code
 - [ ] Update root `README.md`: Trending Videos, auth architecture, how to run tests

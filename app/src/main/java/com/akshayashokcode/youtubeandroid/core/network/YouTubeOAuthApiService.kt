@@ -18,15 +18,21 @@ import com.akshayashokcode.youtubeandroid.core.model.PlaylistItem
 import com.akshayashokcode.youtubeandroid.core.model.PlaylistItemInsertRequest
 import com.akshayashokcode.youtubeandroid.core.model.Subscription
 import com.akshayashokcode.youtubeandroid.core.model.SubscriptionInsertRequest
+import com.akshayashokcode.youtubeandroid.core.model.Video
+import com.akshayashokcode.youtubeandroid.core.model.VideoInsertRequest
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 interface YouTubeOAuthApiService {
 
@@ -103,16 +109,30 @@ interface YouTubeOAuthApiService {
         @Query("id") id: String,
     )
 
-    // ── Video upload ──────────────────────────────────────────────────────────
+    // ── Video upload (resumable protocol) ─────────────────────────────────────
+    // https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol
 
-    @Multipart
-    @POST("upload/youtube/v3/videos")
-    suspend fun uploadVideo(
+    /** Step 1: send metadata. The upload session URI comes back in the Location header. */
+    @POST("upload/youtube/v3/videos?uploadType=resumable")
+    suspend fun startVideoUpload(
         @Query("part") part: String = "snippet,status",
-        @Part("snippet") snippet: RequestBody,
-        @Part("status") status: RequestBody,
-        @Part video: MultipartBody.Part,
-    ): com.akshayashokcode.youtubeandroid.core.model.Video
+        @Header("X-Upload-Content-Length") contentLength: Long,
+        @Header("X-Upload-Content-Type") contentType: String,
+        @Body metadata: VideoInsertRequest,
+    ): Response<Unit>
+
+    /**
+     * Step 2: send one chunk to the session URI with `Content-Range: bytes start-end/total`.
+     * 308 = chunk stored, send the next one (Range header says how much the server has);
+     * 200/201 = upload finished, body is the Video.
+     * An empty chunk with an unknown range asks how much the server has (see VideoUploadRepository).
+     */
+    @PUT
+    suspend fun uploadVideoChunk(
+        @Url sessionUri: String,
+        @Header("Content-Range") contentRange: String,
+        @Body chunk: RequestBody,
+    ): Response<Video>
 
     // ── Live Broadcasts ───────────────────────────────────────────────────────
 

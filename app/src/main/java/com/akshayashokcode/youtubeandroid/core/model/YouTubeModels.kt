@@ -374,6 +374,29 @@ data class SubscriptionInsertSnippet(
     val resourceId: ResourceId,
 )
 
+// ── Video upload ──────────────────────────────────────────────────────────────
+
+/** Metadata sent when starting a resumable videos.insert session. */
+@JsonClass(generateAdapter = true)
+data class VideoInsertRequest(
+    val snippet: VideoInsertSnippet,
+    val status: VideoInsertStatus,
+)
+
+@JsonClass(generateAdapter = true)
+data class VideoInsertSnippet(
+    val title: String,
+    val description: String,
+    val tags: List<String>,
+    val categoryId: String,
+)
+
+@JsonClass(generateAdapter = true)
+data class VideoInsertStatus(
+    val privacyStatus: String,
+    val selfDeclaredMadeForKids: Boolean,
+)
+
 // ── Captions ──────────────────────────────────────────────────────────────────
 
 @JsonClass(generateAdapter = true)

@@ -4,7 +4,7 @@ These examples require Google Sign-In / OAuth 2.0 because they read or mutate a 
 
 ## Planned folders
 
-- `upload_videos` — resumable uploads, privacy status, title, description, tags, and thumbnails.
+- `upload_video` — resumable uploads with progress, privacy status, title, description, and tags.
 - `live_streaming` — broadcast creation, stream binding, health checks, and lifecycle transitions.
 - `live_chat` — read live chat messages, post messages, and handle polling intervals.
 - `comments` — insert, moderate, and delete comment threads/comments.

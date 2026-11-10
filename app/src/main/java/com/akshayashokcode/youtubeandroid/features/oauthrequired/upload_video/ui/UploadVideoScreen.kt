@@ -1,6 +1,7 @@
 package com.akshayashokcode.youtubeandroid.features.oauthrequired.upload_video.ui
 
 import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -34,8 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.akshayashokcode.youtubeandroid.core.ui.UiState
 import com.akshayashokcode.youtubeandroid.features.oauthrequired.upload_video.VideoUploadViewModel
-import java.io.File
-import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,22 +52,22 @@ fun UploadVideoScreen(
     var selectedPrivacy by rememberSaveable { mutableStateOf("private") }
     var madeForKids by rememberSaveable { mutableStateOf(false) }
     var selectedFileName by rememberSaveable { mutableStateOf<String?>(null) }
-    var selectedFile by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedUri by rememberSaveable { mutableStateOf<String?>(null) }
 
     val uiState by viewModel.uiState.collectAsState()
+    val progress by viewModel.progress.collectAsState()
     val privacyOptions = listOf("private", "public", "unlisted")
 
     val filePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
+        // Keep the Uri: the repository streams chunks straight from it, so nothing is copied.
         uri?.let {
-            val fileName = it.lastPathSegment ?: "upload.mp4"
-            selectedFileName = fileName
-            val tempFile = File(context.cacheDir, fileName)
-            context.contentResolver.openInputStream(it)?.use { input ->
-                FileOutputStream(tempFile).use { out -> input.copyTo(out) }
-            }
-            selectedFile = tempFile.absolutePath
+            selectedFileName = context.contentResolver
+                .query(it, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+                ?: it.lastPathSegment
+            selectedUri = it.toString()
         }
     }
 
@@ -80,7 +80,7 @@ fun UploadVideoScreen(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("Upload Video", style = MaterialTheme.typography.headlineMedium)
-                Text("Endpoint: videos.insert (multipart)\nScope: youtube.upload · Quota: 1600 units",
+                Text("Endpoint: videos.insert (resumable upload)\nScope: youtube.upload · Quota: 1600 units",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -136,17 +136,27 @@ fun UploadVideoScreen(
         item {
             Button(
                 onClick = {
-                    selectedFile?.let {
-                        viewModel.upload(File(it), title, description, tags, categoryId, selectedPrivacy, madeForKids)
+                    selectedUri?.let {
+                        viewModel.upload(Uri.parse(it), title, description, tags, categoryId, selectedPrivacy, madeForKids)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = selectedFile != null && uiState !is UiState.Loading,
+                enabled = selectedUri != null && uiState !is UiState.Loading,
             ) { Text("Upload") }
         }
 
         when (val s = uiState) {
-            UiState.Loading -> item { CircularProgressIndicator() }
+            UiState.Loading -> item {
+                val fraction = progress
+                if (fraction == null) {
+                    CircularProgressIndicator()
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
+                        Text("Uploading… ${(fraction * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
             is UiState.Data -> item {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Upload complete!", color = MaterialTheme.colorScheme.primary)
