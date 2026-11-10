@@ -9,7 +9,7 @@ _Last reviewed: 2026-10-24. `./gradlew assembleDebug testDebugUnitTest` passes (
 | Area | State |
 |---|---|
 | API-key features (6 screens) | ✅ Runnable end to end |
-| OAuth features (7 screens) | 🟡 Wired to real Google sign-in; **not yet tested end to end** with a registered OAuth client |
+| OAuth features (7 screens) | 🟡 Sign-in and Subscriptions verified on a device; other 6 features not yet run against the real API |
 | Navigation | ✅ Compose `NavHost`, 17 routes |
 | Unit tests | 🟡 7 of 13 feature ViewModels + AuthViewModel covered |
 | Planned polish (raw JSON, setup guide screen, structured errors) | ⬜ Not started |
@@ -80,12 +80,15 @@ Ordered by priority.
 - [x] Commit Phases 2–5 work (branch `feature/oauth-features-and-status`)
 - [x] Merged into `master` (PR #10)
 
-### 1. Verify OAuth end to end (needs your Google Cloud setup)
-Code is done (`AuthRepository`, `OAuthTokenAuthenticator`, consent launcher in `YouTubeExamplesApp`). What's left needs a Cloud project:
+### 1. Verify OAuth end to end
+Cloud setup is done (Android OAuth client, test users, `youtube.force-ssl` scope, API key restricted to the app). Verified on a Galaxy M21:
+sign-in, session restore, restricted API key (Video Details), Subscriptions subscribe + unsubscribe.
 
-- [ ] Register an **Android** OAuth client for `com.akshayashokcode.youtubeandroid` with the debug SHA-1 (`./gradlew signingReport`), and add your account as a test user. See `setup-guide/OAUTH_SETUP.md`.
-- [ ] Run each OAuth feature on a device against a test channel; fix whatever the real API rejects
-- [ ] Add the release SHA-1 before shipping a release build
+- [ ] Run the remaining OAuth features against a test channel: Comments, Manage Playlists, Captions, Upload Video, Live Streaming, Live Chat
+- [ ] Live Streaming / Live Chat: enable live streaming on the test channel in YouTube Studio first (can take 24 h)
+- [ ] Add a "delete playlist" action so Manage Playlists can clean up after itself (`deletePlaylist` exists in the API service, not in the UI)
+- [ ] Before a release build: create a release keystore, add its SHA-1 to the OAuth client and the API key restriction
+- [ ] Optional: submit the consent screen for verification; until then only listed test users can sign in and API uploads stay private
 
 ### 2. Feature gaps
 - [ ] **Resumable upload** for Upload Video. Today it is a single multipart request, which fails for large files. The feature README already promises resumable uploads, progress, and an upload session URL.
