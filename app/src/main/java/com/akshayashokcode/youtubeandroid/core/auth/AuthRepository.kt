@@ -12,12 +12,17 @@ import com.google.android.gms.auth.api.identity.RevokeAccessRequest
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,6 +47,7 @@ class AuthRepository @Inject constructor(
     private val authorizationClient = Identity.getAuthorizationClient(context)
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val refreshMutex = Mutex()
+    private val profileClient = OkHttpClient()
     private var account: Account? = null
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.SignedOut)
@@ -72,7 +78,7 @@ class AuthRepository @Inject constructor(
     }
 
     /** Call with the data Intent returned from the consent screen launched for [signIn]. */
-    fun onConsentResult(data: Intent?) {
+    suspend fun onConsentResult(data: Intent?) {
         try {
             onAuthorized(authorizationClient.getAuthorizationResultFromIntent(data))
         } catch (e: ApiException) {
@@ -137,22 +143,46 @@ class AuthRepository @Inject constructor(
         markSignedOut()
     }
 
-    private fun onAuthorized(result: AuthorizationResult) {
+    private suspend fun onAuthorized(result: AuthorizationResult) {
         val token = result.accessToken
         if (token == null) {
             _authState.value = AuthState.Error("Google didn't return an access token.")
             return
         }
-        // Present because SCOPES includes "email" and "profile".
-        val googleAccount = result.toGoogleSignInAccount()
-        account = googleAccount?.account
+        // Silent refreshes keep the profile we already have; only a fresh sign-in fetches it.
+        val previous = _authState.value as? AuthState.SignedIn
+        val profile = previous?.let { Profile(it.email, it.displayName) } ?: fetchProfile(token)
+        val email = profile?.email.orEmpty()
+
+        account = result.toGoogleSignInAccount()?.account
+            ?: email.takeIf { it.isNotBlank() }?.let { Account(it, GOOGLE_ACCOUNT_TYPE) }
         prefs.edit().putBoolean(KEY_SIGNED_IN, true).apply()
         _authState.value = AuthState.SignedIn(
-            email = googleAccount?.email.orEmpty(),
-            displayName = googleAccount?.displayName ?: "Google account",
+            email = email,
+            displayName = profile?.name?.takeIf { it.isNotBlank() } ?: "Google account",
             token = token,
         )
     }
+
+    /**
+     * AuthorizationClient results carry no name or email (toGoogleSignInAccount() comes back
+     * empty), so read them from the userinfo endpoint. Allowed by the "email" and "profile" scopes.
+     */
+    private suspend fun fetchProfile(token: String): Profile? = withContext(Dispatchers.IO) {
+        runCatching {
+            val request = Request.Builder()
+                .url(USERINFO_URL)
+                .header("Authorization", "Bearer $token")
+                .build()
+            profileClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@use null
+                val json = JSONObject(response.body?.string().orEmpty())
+                Profile(email = json.optString("email"), name = json.optString("name"))
+            }
+        }.getOrNull()
+    }
+
+    private data class Profile(val email: String, val name: String)
 
     private suspend fun clearCachedToken(token: String) {
         runCatching {
@@ -195,6 +225,8 @@ class AuthRepository @Inject constructor(
             )
         }
 
+        private const val USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
+        private const val GOOGLE_ACCOUNT_TYPE = "com.google"
         private const val PREFS_NAME = "auth"
         private const val KEY_SIGNED_IN = "signed_in"
     }

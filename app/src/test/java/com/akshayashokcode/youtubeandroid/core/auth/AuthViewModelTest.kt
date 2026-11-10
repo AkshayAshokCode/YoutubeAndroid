@@ -71,13 +71,14 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `consent result OK is passed to repository`() {
+    fun `consent result OK is passed to repository`() = runTest {
         val data = mockk<Intent>()
-        every { repository.onConsentResult(data) } just runs
+        coEvery { repository.onConsentResult(data) } just runs
 
         viewModel.onConsentResult(Activity.RESULT_OK, data)
+        dispatcher.scheduler.advanceUntilIdle()
 
-        verify { repository.onConsentResult(data) }
+        coVerify { repository.onConsentResult(data) }
     }
 
     @Test

@@ -30,7 +30,12 @@ class SubscriptionsViewModel @Inject constructor(
     fun subscribe(channelId: String) {
         viewModelScope.launch {
             repository.subscribe(channelId)
-                .onStart { _state.value = _state.value.copy(subscribeState = UiState.Loading) }
+                .onStart {
+                    _state.value = _state.value.copy(
+                        subscribeState = UiState.Loading,
+                        unsubscribeState = UiState.Idle,
+                    )
+                }
                 .collect { result ->
                     _state.value = when (result) {
                         is AppResult.Success -> _state.value.copy(
@@ -52,6 +57,8 @@ class SubscriptionsViewModel @Inject constructor(
                 .collect { result ->
                     _state.value = when (result) {
                         is AppResult.Success -> _state.value.copy(
+                            // Clear the old "Subscribed!" result so the screen doesn't show a stale ID.
+                            subscribeState = UiState.Idle,
                             unsubscribeState = UiState.Data(Unit),
                             subscriptionId = null,
                         )

@@ -37,7 +37,7 @@ class AuthViewModel @Inject constructor(
 
     fun onConsentResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            authRepository.onConsentResult(data)
+            viewModelScope.launch { authRepository.onConsentResult(data) }
         } else {
             authRepository.onConsentCancelled()
         }

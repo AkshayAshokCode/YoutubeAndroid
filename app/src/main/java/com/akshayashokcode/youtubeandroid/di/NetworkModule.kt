@@ -1,5 +1,6 @@
 package com.akshayashokcode.youtubeandroid.di
 
+import com.akshayashokcode.youtubeandroid.BuildConfig
 import com.akshayashokcode.youtubeandroid.core.network.ApiKeyInterceptor
 import com.akshayashokcode.youtubeandroid.core.network.OAuthInterceptor
 import com.akshayashokcode.youtubeandroid.core.network.OAuthTokenAuthenticator
@@ -29,8 +30,10 @@ object NetworkModule {
         .add(KotlinJsonAdapterFactory())
         .build()
 
+    // Debug builds only: logged URLs include the API key query parameter.
     private fun loggingInterceptor() = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BASIC
+        level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC
+        else HttpLoggingInterceptor.Level.NONE
     }
 
     @Provides

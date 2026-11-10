@@ -72,6 +72,7 @@ class SubscriptionsViewModelTest {
             awaitItem() // loading
             val result = awaitItem()
             assertTrue(result.unsubscribeState is UiState.Data)
+            assertTrue(result.subscribeState is UiState.Idle)
             assertEquals(null, result.subscriptionId)
             cancelAndIgnoreRemainingEvents()
         }
