@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.akshayashokcode.youtubeandroid.core.ui.UiState
 import com.akshayashokcode.youtubeandroid.features.oauthrequired.live_streaming.LiveStreamingViewModel
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +42,10 @@ fun LiveStreamingScreen(
     viewModel: LiveStreamingViewModel = hiltViewModel(),
 ) {
     var broadcastTitle by rememberSaveable { mutableStateOf("") }
-    var startTime by rememberSaveable { mutableStateOf("") }
+    // Pre-filled with a valid future time so the default works; YouTube expects ISO 8601.
+    var startTime by rememberSaveable {
+        mutableStateOf(Instant.now().plus(10, ChronoUnit.MINUTES).truncatedTo(ChronoUnit.MINUTES).toString())
+    }
     var broadcastDesc by rememberSaveable { mutableStateOf("") }
     var privacyExpanded by rememberSaveable { mutableStateOf(false) }
     var selectedPrivacy by rememberSaveable { mutableStateOf("private") }
@@ -77,7 +82,7 @@ fun LiveStreamingScreen(
         item {
             OutlinedTextField(value = startTime, onValueChange = { startTime = it },
                 modifier = Modifier.fillMaxWidth(), label = { Text("Scheduled start (ISO 8601)") },
-                placeholder = { Text("2025-12-31T20:00:00Z") })
+                supportingText = { Text("UTC, e.g. 2026-12-31T20:00:00Z. Must be in the future.") })
         }
         item {
             OutlinedTextField(value = broadcastDesc, onValueChange = { broadcastDesc = it },
